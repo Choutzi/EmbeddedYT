@@ -47,6 +47,25 @@
             outline: none;
         }
 
+        #open-button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            font-size: 1.2em;
+            background-color: #282828;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        #open-button:hover {
+            background-color: #383838;
+        }
+
+        #open-button:focus {
+            outline: none;
+        }
+
         #display-iframe {
             flex-grow: 1;
             width: 100%;
@@ -59,17 +78,19 @@
     <div id="input-container">
         <input type="text" id="url-input" placeholder="Enter URL here">
         <button id="go-button">Load</button>
+        <button id="open-button">New Tab</button>
     </div>
     <iframe title="Input and Display" id="display-iframe" allowfullscreen></iframe>
 
     <script>
-        function parseYouTubeURL(url) {
-            var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            var match = url.match(regExp);
+        function getEmbedUrl() {
+            const url = document.getElementById('url-input').value;
+            const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
 
             if (match && match[2].length == 11) {
-                var embedUrl = 'https://www.youtube.com/embed/' + match[2];
-                var params = url.split('?')[1];
+                let embedUrl = 'https://www.youtube.com/embed/' + match[2];
+                const params = url.split('?')[1];
                 if (params) {
                     embedUrl += '?' + params;
                 }
@@ -80,10 +101,16 @@
         }
 
         // Usage example: Update the iframe source with the parsed YouTube embed URL
-        document.getElementById('go-button').addEventListener('click', function () {
-            var url = document.getElementById('url-input').value;
-            var embedUrl = parseYouTubeURL(url);
+        document.getElementById('go-button').addEventListener('click', () => {
+            const embedUrl = getEmbedUrl();
             document.getElementById('display-iframe').src = embedUrl;
+        });
+
+        document.getElementById('open-button').addEventListener('click', () => {
+            const embedUrl = getEmbedUrl();
+            if (embedUrl !== 'Invalid URL') {
+                window.open(embedUrl, '_blank').focus();
+            }
         });
     </script>
 </body>
