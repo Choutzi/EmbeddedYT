@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input and Display</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #input-container {
+            margin: 10px auto;
+            text-align: center;
+        }
+
+        #url-input {
+            padding: 10px;
+            width: 75%;
+            font-size: 1.2em;
+            border: 1px solid #d3d3d3;
+            border-radius: 2px;
+        }
+
+        #go-button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            font-size: 1.2em;
+            background-color: #c4302b;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        #go-button:hover {
+            background-color: #e52d27;
+        }
+
+        #go-button:focus {
+            outline: none;
+        }
+
+        #display-iframe {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="input-container">
+        <input type="text" id="url-input" placeholder="Enter URL here">
+        <button id="go-button">Load</button>
+    </div>
+    <iframe title="Input and Display" id="display-iframe" allowfullscreen></iframe>
+
+    <script>
+        function parseYouTubeURL(url) {
+            var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+
+            if (match && match[2].length == 11) {
+                var embedUrl = 'https://www.youtube.com/embed/' + match[2];
+                var params = url.split('?')[1];
+                if (params) {
+                    embedUrl += '?' + params;
+                }
+                return embedUrl;
+            } else {
+                return 'Invalid URL';
+            }
+        }
+
+        // Usage example: Update the iframe source with the parsed YouTube embed URL
+        document.getElementById('go-button').addEventListener('click', function () {
+            var url = document.getElementById('url-input').value;
+            var embedUrl = parseYouTubeURL(url);
+            document.getElementById('display-iframe').src = embedUrl;
+        });
+    </script>
+</body>
+
+</html>
