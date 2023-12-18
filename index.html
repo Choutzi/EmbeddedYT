@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Choutzi Ebedded</title>
     <style>
         html,
@@ -47,25 +47,6 @@
             outline: none;
         }
 
-        #open-button {
-            padding: 10px 20px;
-            margin-left: 10px;
-            font-size: 1.2em;
-            background-color: #282828;
-            color: white;
-            border: none;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-
-        #open-button:hover {
-            background-color: #383838;
-        }
-
-        #open-button:focus {
-            outline: none;
-        }
-
         #display-iframe {
             flex-grow: 1;
             width: 100%;
@@ -75,43 +56,73 @@
 </head>
 
 <body>
-    <div id="input-container">
-        <input type="text" id="url-input" placeholder="Enter URL here">
-        <button id="go-button">Load</button>
-        <button id="open-button">New Tab</button>
+    <div id='input-container'>
+        <input type='text' id='url-input' placeholder='Enter URL here'>
+        <button id='go-button'>Load</button>
     </div>
-    <iframe title="Input and Display" id="display-iframe" allowfullscreen></iframe>
+    <iframe title='Input and Display' id='display-iframe' allowfullscreen onLoad="onIframeLoad()"></iframe>
 
     <script>
-        function getEmbedUrl() {
-            const url = document.getElementById('url-input').value;
+        function parseYouTubeUrl(url) {
             const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
 
             if (match && match[2].length == 11) {
-                let embedUrl = 'https://www.youtube.com/embed/' + match[2];
+                let options = null;
                 const params = url.split('?')[1];
                 if (params) {
-                    embedUrl += '?' + params;
+                    const queryParams = new URLSearchParams(params);
+                    queryParams.delete('v'); // Remove the 'v' parameter
+                    options = queryParams.toString();
                 }
-                return embedUrl;
-            } else {
-                return 'Invalid URL';
+                return { id: match[2], options };
             }
+
+            return null;
         }
 
-        // Usage example: Update the iframe source with the parsed YouTube embed URL
-        document.getElementById('go-button').addEventListener('click', () => {
-            const embedUrl = getEmbedUrl();
-            document.getElementById('display-iframe').src = embedUrl;
-        });
-
-        document.getElementById('open-button').addEventListener('click', () => {
-            const embedUrl = getEmbedUrl();
-            if (embedUrl !== 'Invalid URL') {
-                window.open(embedUrl, '_blank').focus();
+        function getCustomUrl(url, toEmbed) {
+            const parsedUrl = parseYouTubeUrl(url);
+            if (!parsedUrl) {
+                return "Invalid URL";
             }
-        });
+
+            const base = toEmbed ? "https://www.youtube.com/embed/" : "https://www.youtube.com/watch?v=";
+            let customUrl = base + parsedUrl.id;
+            if (parsedUrl.options) {
+                customUrl += (toEmbed ? "?" : "&") + parsedUrl.options;
+            }
+
+            return customUrl;
+        }
+
+        function onIframeLoad() {
+            const iframeUrl = document.getElementById('display-iframe').src;
+            const normalYTUrl = getCustomUrl(iframeUrl, false);
+            //Update url params
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('src', normalYTUrl);
+            window.history.replaceState(null, null, currentUrl);
+            document.getElementById('url-input').value = normalYTUrl;
+        }
+
+        function fromInput() {
+            const url = document.getElementById('url-input').value;
+            document.getElementById('display-iframe').src = getCustomUrl(url, true);
+        }
+
+        document.getElementById('go-button').addEventListener('click', fromInput);
+
+        document.getElementById('url-input').addEventListener('keydown', (event) => {
+            if (event.keyCode == 13) {
+                fromInput();
+            }
+        })
+
+        const videoUrl = new URL(window.location.href).searchParams.get('src');
+        if (videoUrl) {
+            document.getElementById('display-iframe').src = getCustomUrl(videoUrl, true);
+        }
     </script>
 </body>
 
