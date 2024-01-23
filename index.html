@@ -102,7 +102,7 @@
             //Update url params
             const currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set('src', normalYTUrl);
-            window.history.replaceState(null, null, currentUrl);
+            window.history.pushState(null, null, currentUrl);
             document.getElementById('url-input').value = normalYTUrl;
         }
 
